@@ -1,0 +1,37 @@
+.rootContainer {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.rootContainer::-webkit-scrollbar {
+  display: none;
+}
+
+.headerSection {
+  min-height: 300px;
+  padding: 32px;
+  display: flex;
+  align-items: flex-end;
+  position: relative;
+  overflow: hidden;
+}
+
+.categoryTitle {
+  font-size: 4rem !important;
+  font-weight: 900 !important;
+  color: white;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+  z-index: 1;
+  position: relative;
+}
+
+.contentSection {
+  flex: 1;
+  padding: 24px 32px;
+  background-color: #121212;
+}

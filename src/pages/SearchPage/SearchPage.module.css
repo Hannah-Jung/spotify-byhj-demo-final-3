@@ -1,0 +1,129 @@
+.rootContainer {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  overflow-y: auto;
+  padding: 0;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.rootContainer::-webkit-scrollbar {
+  display: none;
+}
+
+.headerSection {
+  flex-shrink: 0;
+  padding-bottom: 24px;
+  margin-bottom: 24px;
+}
+
+.title {
+  margin: 0 0 24px 0 !important;
+  font-size: 2rem !important;
+  font-weight: 700 !important;
+}
+
+.searchInput {
+  width: 100%;
+}
+
+.searchInput :global(.MuiOutlinedInput-root) {
+  border-radius: 500px !important;
+}
+
+.searchInput :global(.MuiInputAdornment-root svg) {
+  color: rgba(255, 255, 255, 0.7);
+  transition: color 0.2s ease;
+}
+
+.searchInput:focus-within :global(.MuiInputAdornment-root svg) {
+  color: rgba(255, 255, 255, 1);
+}
+
+.clearButton {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.clearButton:hover {
+  color: rgba(255, 255, 255, 1);
+}
+
+.categoriesSection {
+  flex: 1;
+  width: 100%;
+}
+
+.categoriesTitle {
+  margin: 0 0 16px 0 !important;
+  font-size: 1.5rem !important;
+  font-weight: 700 !important;
+}
+
+.categoriesGrid {
+  width: 100%;
+  margin: 0;
+}
+
+.categoryCard {
+  height: 100%;
+  min-height: 300px;
+  border-radius: 8px;
+  overflow: hidden;
+  position: relative;
+}
+
+.categoryCardContent {
+  height: 100%;
+  display: flex;
+  align-items: flex-start;
+  padding: 16px !important;
+  position: relative;
+  overflow: hidden;
+}
+
+.categoryName {
+  font-size: 1.8rem !important;
+  font-weight: 700 !important;
+  color: white;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  line-height: 1.2;
+  position: relative;
+  z-index: 2;
+}
+
+.categoryImage {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 230px;
+  height: 230px;
+  object-fit: cover;
+  transform: rotate(30deg) translate(40px, 10px);
+  opacity: 0.9;
+  z-index: 1;
+  pointer-events: none;
+  border-radius: 15px;
+}
+
+.topResultCard {
+  position: relative;
+}
+
+.topResultCard:hover {
+  background-color: rgba(255, 255, 255, 0.15) !important;
+}
+
+.topResultCard:hover :global(.playButton) {
+  opacity: 1 !important;
+  transform: translateY(-5px) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.7) !important;
+}
+
+.topResultCard :global(.playButton) {
+  opacity: 0;
+  transform: translateY(10px);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}

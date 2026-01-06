@@ -1,0 +1,12 @@
+.library {
+  min-height: 400px;
+  max-height: 75vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.library::-webkit-scrollbar {
+  display: none;
+}

@@ -1,0 +1,89 @@
+.card {
+  min-width: 160px;
+  width: 100%;
+  height: 100%;
+  padding: 15px;
+  border-radius: 8px;
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.card:hover {
+  background-color: #1e1e1e;
+  transform: translate3d(0px, 0px, 0px);
+  transition: opacity 0.3s ease-in-out;
+  cursor: pointer;
+  z-index: 10 !important;
+}
+
+.cardImage {
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  width: 100%;
+  display: block;
+  border-radius: 8px;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.cardImage::after {
+  position: absolute;
+  content: '';
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #1e1e1e;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 1;
+}
+
+.card:hover .cardImage::after {
+  opacity: 1;
+}
+
+.playButton {
+  position: absolute !important;
+  top: auto !important;
+  bottom: 85px !important;
+  right: 22px !important;
+  background-color: #00d86b !important;
+  color: black !important;
+  width: 48px !important;
+  height: 48px !important;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  z-index: 2 !important;
+  cursor: pointer;
+}
+
+.card:hover .playButton {
+  opacity: 1 !important;
+  transform: translateY(-5px) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.7) !important;
+}
+
+.cardContent {
+  position: relative;
+  z-index: 3;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  padding-top: 12px;
+}
+
+.cardTitle {
+  margin: 0px;
+  font-size: 1rem !important;
+  font-family: Roboto, Arial, sans-serif;
+  font-weight: 300;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
