@@ -17,7 +17,7 @@ const Playlist = ({ playlists, onPlaylistClick, selectedPlaylistId }: PlaylistPr
         const isSelected = selectedPlaylistId === playlist.id;
         
         return (
-          <div key={playlist.id} className={`${styles.playlistCard} ${isSelected ? styles.selected : ''}`} onClick={() => onPlaylistClick?.(playlist)}>
+          <div key={playlist.id} className={`${styles.playlistCard} ${isSelected ? styles.selected : ''}`} onClick={() => onPlaylistClick?.(playlist)} data-playlist-id={playlist.id}>
             <div className={styles.playlistImage}>
               {hasImage ? (
                 <img 
