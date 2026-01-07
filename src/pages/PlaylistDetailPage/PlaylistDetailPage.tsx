@@ -6,13 +6,12 @@ import styles from "./PlaylistDetailPage.module.css"
 import { MusicNoteOutlined } from "@mui/icons-material"
 import useGetCurrentUserProfile from "../../hooks/useGetCurrentUserProfile"
 import useGetPlaylistItems from "../../hooks/useGetPlaylistItems"
-import { Avatar, Box, Table, TableBody, TableCell, TableHead, TableRow, Typography } from "@mui/material"
+import { Avatar, Table, TableBody, TableCell, TableHead, TableRow } from "@mui/material"
 import { useInView } from 'react-intersection-observer'
 import DesktopPlaylistItem from "./components/DesktopPlaylistItem"
 import { PAGE_LIMIT } from "../../configs/commonConfig"
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import { useEffect } from "react"
-import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import EmptyPlaylistWithSearch from "./components/EmptyPlaylistWithSearch"
 
 const PlaylistDetailPage = () => {
@@ -34,21 +33,7 @@ const PlaylistDetailPage = () => {
 
   if (isLoading) return <LoadingSpinner/>
 if (error) {
-  console.log("Full error:", error);
-  if (
-    error.message?.includes('401') || 
-    error.message?.includes('Unauthorized') ||
-    !userProfile
-  ) {
-    return (
-      <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" height="100vh">
-        <ErrorOutlineIcon sx={{ fontSize: 80, color: '#1ed760', mb: 3 }} />
-        <Typography variant="h4" mb={2}>Please log in again.</Typography>
-        <Typography mb={4}>Login is required to view playlists.</Typography>
-      </Box>
-    );
-  }
-  return <ErrorMessage errorMessage={error.message} />;
+  return <ErrorMessage error={error} userProfile={userProfile} />
 }
   if (!playlist) return <div>Playlist not found</div> 
 
@@ -67,10 +52,17 @@ if (error) {
     ?.reduce((sum, item) => sum + (item.track.duration_ms || 0), 0) || 0;
 
   const hasImage = playlist.images && playlist.images.length > 0
+  const backgroundImageUrl = hasImage ? playlist.images?.[0]?.url : null
 
 return (
-  <div className={styles.container}>
+  <div className={`${styles.container} ${hasImage ? styles.hasImage : ''}`}>
     <div className={styles.header}>
+      {backgroundImageUrl && (
+        <div 
+          className={styles.headerBackground}
+          style={{ backgroundImage: `url(${backgroundImageUrl})` }}
+        />
+      )}
       <div className={styles.imageContainer}>
         {hasImage ? (
           <img src={playlist.images?.[0]?.url} alt={playlist.name} />
@@ -83,7 +75,9 @@ return (
       <div className={styles.info}>
         <p className={styles.typeLabel}>PLAYLIST</p>
         <h1 className={styles.name}>{playlist.name}</h1>
-        {playlist.description && <p className={styles.description}>{playlist.description}</p>}
+        {playlist.description && playlist.description !== 'null' && playlist.description.trim() !== '' && (
+          <p className={styles.description}>{playlist.description}</p>
+        )}
         <div className={styles.owner}>
           {userProfile?.images?.length ? (
             <img className={styles.ownerImage} src={userProfile?.images[0].url} alt={userProfile.display_name || "User"} />
@@ -119,7 +113,7 @@ return (
         {playlist?.tracks?.total !== 0 && (
         <TableHead className={styles.tableHeader}>
           <TableRow>
-            <TableCell className={styles.colIndex} sx={{ width: 50 }}>#</TableCell>
+            <TableCell className={styles.colIndex} sx={{ width: 50, textAlign: 'center'  }}>#</TableCell>
             <TableCell className={styles.colTitleThumb} sx={{ width: 60 }}></TableCell>
             <TableCell className={styles.colTitle} sx={{ width: 350 }}>Title</TableCell>
             <TableCell className={styles.colAlbum} sx={{ width: 250 }}>Album</TableCell>

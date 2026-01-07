@@ -31,14 +31,15 @@ const SearchWithKeywordPage = () => {
   }
 
   if (categoriesError) {
-    return <ErrorMessage errorMessage={categoriesError instanceof Error ? categoriesError.message : 'Failed to load categories'} />
+    return <ErrorMessage error={categoriesError} />
   }
 
   if (!category) {
     return (
-      <Box sx={{ p: 3 }}>
-        <Typography variant="h2">Category not found</Typography>
-      </Box>
+      <ErrorMessage 
+        error={new Error('Category not found')} 
+        variant="fullscreen"
+      />
     )
   }
 
@@ -47,7 +48,7 @@ const SearchWithKeywordPage = () => {
   }
 
   if (playlistsError) {
-    return <ErrorMessage errorMessage={playlistsError instanceof Error ? playlistsError.message : 'Failed to load playlists'} />
+    return <ErrorMessage error={playlistsError} />
   }
 
   const playlists = data?.playlists.items || []

@@ -31,6 +31,15 @@
 
 .searchInput :global(.MuiOutlinedInput-root) {
   border-radius: 500px !important;
+  transition: border-color 0.3s ease;
+}
+
+.searchInput :global(.MuiOutlinedInput-root:hover) {
+  border-color: #00d86b !important;
+}
+
+.searchInput :global(.MuiOutlinedInput-notchedOutline) {
+  transition: border-color 0.3s ease;
 }
 
 .searchInput :global(.MuiInputAdornment-root svg) {
@@ -106,14 +115,200 @@
   z-index: 1;
   pointer-events: none;
   border-radius: 15px;
+  transition: transform 0.5s ease;
+}
+
+.categoryCard:hover .categoryImage {
+  animation: iconPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes iconPulse {
+  0%, 100% {
+    transform: rotate(30deg) translate(40px, 10px) scale(1);
+  }
+
+  50% {
+    transform: rotate(30deg) translate(40px, 10px) scale(1.05);
+  }
 }
 
 .topResultCard {
   position: relative;
+  background-color: #121212;
+  border-radius: 8px;
+  padding: 16px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  height: 288px;
+  display: flex;
+  flex-direction: column;
 }
 
 .topResultCard:hover {
   background-color: rgba(255, 255, 255, 0.15) !important;
+}
+
+.topResultImageContainer {
+  width: 100%;
+  max-width: 180px;
+  aspect-ratio: 1;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 8px;
+  position: relative;
+  flex-shrink: 0;
+  align-self: center;
+}
+
+.topResultImageContainer.album {
+  margin-bottom: 16px;
+}
+
+.topResultImage {
+  width: 100%;
+  height: 100%;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.topResultImage.artist {
+  border-radius: 0;
+}
+
+.topResultTitle {
+  font-weight: 700 !important;
+  margin-bottom: 5px !important;
+  font-size: 1.5rem !important;
+  flex-shrink: 0;
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+.topResultSubtitle {
+  flex-shrink: 0;
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+.sectionTitle {
+  margin-bottom: 16px !important;
+  font-weight: 700 !important;
+  font-size: 25px !important;
+}
+
+.trackListContainer {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.trackItem {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.trackItem:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.trackImageContainer {
+  position: relative;
+  width: 56px;
+  height: 56px;
+  flex-shrink: 0;
+  overflow: hidden;
+  border-radius: 4px;
+}
+
+.trackImageContainer:hover {
+  background-color: transparent;
+}
+
+.trackImage {
+  width: 56px;
+  height: 56px;
+  border-radius: 4px;
+  object-fit: cover;
+  transition: opacity 0.2s ease;
+}
+
+.trackOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.3);
+  z-index: 1;
+}
+
+.trackPlayButtonContainer {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 2;
+}
+
+.trackPlayButtonContainer:hover {
+  background-color: transparent;
+}
+
+.trackPlayIconButton {
+  color: white !important;
+  background-color: transparent !important;
+  padding: 4px;
+}
+
+.trackContent {
+  flex: 1;
+  min-width: 0;
+}
+
+.trackTitle {
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.trackArtist {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.trackActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.trackAddButton {
+  color: #adadad !important;
+  padding: 4px;
+  transition: color 0.2s ease;
+}
+
+.trackAddButton:hover {
+  color: white !important;
+  padding: 4px;
+}
+
+.trackDuration {
+  min-width: 40px;
+  text-align: right;
 }
 
 .topResultCard:hover :global(.playButton) {
@@ -123,7 +318,11 @@
 }
 
 .topResultCard :global(.playButton) {
-  opacity: 0;
-  transform: translateY(10px);
+  position: absolute !important;
+  bottom: 16px !important;
+  right: 16px !important;
+  opacity: 0 !important;
+  transform: translateY(10px) !important;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  z-index: 2 !important;
 }

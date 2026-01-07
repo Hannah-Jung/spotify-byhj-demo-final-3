@@ -16,10 +16,13 @@ export const getCategories = async (clientCredentialToken: string, limit: number
       }
     })
     return response.data
-  } catch (error) {
-    throw new Error("Failed to fetch categories")
-  }
-}
+    } catch (error: any) {
+        if (axios.isAxiosError(error)) {
+          throw error
+        }
+        throw new Error("Failed to fetch categories")
+      }
+    }
 
 export const getCategoryPlaylists = async (
   clientCredentialToken: string, 

@@ -18,6 +18,12 @@
   z-index: 10 !important;
 }
 
+.imageContainer {
+  position: relative;
+  width: 100%;
+  flex-shrink: 0;
+}
+
 .cardImage {
   aspect-ratio: 1 / 1;
   object-fit: cover;
@@ -25,7 +31,25 @@
   display: block;
   border-radius: 8px;
   position: relative;
-  flex-shrink: 0;
+}
+
+.cardImage.artistImage {
+  border-radius: 50%;
+}
+
+.defaultImage {
+  aspect-ratio: 1 / 1;
+  width: 100%;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.defaultImage.artistImage {
+  border-radius: 50%;
 }
 
 .cardImage::after {
@@ -47,9 +71,8 @@
 
 .playButton {
   position: absolute !important;
-  top: auto !important;
-  bottom: 85px !important;
-  right: 22px !important;
+  bottom: 2px !important;
+  right: 7px !important;
   background-color: #00d86b !important;
   color: black !important;
   width: 48px !important;
@@ -75,6 +98,7 @@
   flex-direction: column;
   justify-content: flex-start;
   padding-top: 12px;
+  min-width: 0;
 }
 
 .cardTitle {
@@ -83,6 +107,13 @@
   font-family: Roboto, Arial, sans-serif;
   font-weight: 300;
   line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cardArtist {
+  margin: 0px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;

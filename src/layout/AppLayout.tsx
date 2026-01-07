@@ -5,6 +5,9 @@ import SearchIcon from '@mui/icons-material/Search';
 import LibraryHead from './components/LibraryHead';
 import Library from './components/Library';
 import Navbar from './components/Navbar';
+import useGetCurrentUserPlaylists from '../hooks/useGetCurrentUserPlaylists';
+import useGetCurrentUserProfile from '../hooks/useGetCurrentUserProfile';
+import ErrorMessage from '../common/components/ErrorMessage';
 
 const Layout = styled("div")({
   display: "flex",
@@ -36,6 +39,7 @@ const ContentBox = styled(Box)(({theme})=>({
   display: "flex",
   flexDirection: "column",
   overflow: "visible",
+  position: "relative",
 }))
 
 const NavList = styled("ul")({
@@ -62,6 +66,10 @@ const StyledNavLink = styled(NavLink)(({theme})=>({
 }))
 
 const AppLayout = () => {
+  const { error: playlistsError } = useGetCurrentUserPlaylists({limit:10, offset:0})
+  const { data: userProfile, error: userProfileError } = useGetCurrentUserProfile()
+  
+  const libraryError = userProfile ? (playlistsError || userProfileError) : null
   return (
     <Layout>
       <Sidebar>
@@ -84,7 +92,11 @@ const AppLayout = () => {
       </Sidebar>
       <ContentBox>
         <Navbar/>
-        <Outlet/>
+        {libraryError ? (
+          <ErrorMessage error={libraryError} userProfile={userProfile} />
+        ) : (
+          <Outlet/>
+        )}
       </ContentBox>     
     </Layout>
   )

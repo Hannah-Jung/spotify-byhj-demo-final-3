@@ -1,4 +1,4 @@
-import { Button, Card, styled, Typography } from '@mui/material'
+import { Button, Card, styled, Tooltip, Typography } from '@mui/material'
 import useGetCurrentUserProfile from '../../hooks/useGetCurrentUserProfile'
 import { getSpotifyAuthUrl } from '../../utils/auth'
 
@@ -12,8 +12,6 @@ const CreatePlaylistButton = styled(Button)({
   marginTop: "20px",
   fontWeight: "700",
   display: "block",
-  marginLeft: "auto",
-  marginRight: "auto",
 })
 
 const EmptyPlaylist = () => {
@@ -23,17 +21,29 @@ const EmptyPlaylist = () => {
       window.location.href = '/library'
     } else {
       getSpotifyAuthUrl()
+      
   }
 }
+
+const createButton = (
+    <CreatePlaylistButton variant='contained' color="secondary" onClick={handleCreatePlaylist}>
+      Create playlist
+    </CreatePlaylistButton>
+  )
+
   return (
     <EmptyPlaylistCard>
-      <Typography variant='h2' fontWeight={700} textAlign='center'>
+      <Typography variant='h2' fontWeight={700} textAlign='start' mb='8px'>
         Create your first playlist
       </Typography>
-      <Typography variant='body2' textAlign='center'>It's easy, we'll help you</Typography>
-      <CreatePlaylistButton variant='contained' color="secondary" onClick={handleCreatePlaylist}>
-        Create playlist
-      </CreatePlaylistButton>
+      <Typography variant='body2' textAlign='start'>It's easy, we'll help you</Typography>
+      {userProfile ? (
+        createButton
+      ) : (
+        <Tooltip title="Please log in to create playlists" placement="top">
+          {createButton}
+        </Tooltip>
+      )}
     </EmptyPlaylistCard>
   )
 }

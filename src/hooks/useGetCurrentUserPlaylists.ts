@@ -3,12 +3,14 @@ import { getCurrentUserPlaylists } from "../apis/playlistApi"
 import type { GetCurrentUserPlaylistRequest, GetCurrentUserPlaylistResponse } from "../models/playlist"
 
 const useGetCurrentUserPlaylists = ({limit, offset}:GetCurrentUserPlaylistRequest):UseInfiniteQueryResult<InfiniteData<GetCurrentUserPlaylistResponse, Error>, Error> => { 
+  const accessToken = localStorage.getItem("access_token")
   return useInfiniteQuery({
     queryKey: ["current-user-playlists", {offset, limit}], 
     refetchOnMount: true,
     refetchOnReconnect: false, 
     refetchOnWindowFocus: false,
     structuralSharing: false,
+    enabled: !!accessToken,
     queryFn: async ({ pageParam = 0 }) => {
       const response = await getCurrentUserPlaylists({limit, offset:pageParam})
       

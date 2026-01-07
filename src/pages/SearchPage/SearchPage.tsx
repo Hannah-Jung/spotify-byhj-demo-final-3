@@ -14,6 +14,9 @@ import ResultCard from '../../common/components/Card'
 import PlayButton from '../../common/components/PlayButton'
 import useClientCredentialToken from '../../hooks/useClientCredentialToken'
 import { PlayArrow } from '@mui/icons-material'
+import type { Track } from '../../models/track'
+import type { Artist } from '../../models/artist'
+import type { SimplifiedAlbum } from '../../models/album'
 
 const SearchPage = () => {
   const { keyword: urlKeyword } = useParams<{ keyword?: string }>()
@@ -38,7 +41,7 @@ const SearchPage = () => {
 
   const { data: searchData, isLoading: isLoadingSearch, error: searchError } = useSearchItemsByKeyword({
     q: keyword.trim(),
-    type: [SEARCH_TYPE.Track, SEARCH_TYPE.Album, SEARCH_TYPE.Artist],
+    type: [SEARCH_TYPE.Track, SEARCH_TYPE.Album, SEARCH_TYPE.Artist, SEARCH_TYPE.Playlist, SEARCH_TYPE.Show, SEARCH_TYPE.Episode, SEARCH_TYPE.AudioBook],
     limit: 20,
   })
 
@@ -96,18 +99,22 @@ const SearchPage = () => {
     return colors[Math.abs(hash) % colors.length]
   }
 
-  const handleCategoryClick = (categoryId: string) => {
+  const handleCategoryClick = (categoryId: string, categoryName: string) => {
     const color = getRandomColor(categoryId)
-    navigate(`/category/${encodeURIComponent(categoryId)}?color=${encodeURIComponent(color)}`)
+    navigate(`/category/${encodeURIComponent(categoryName)}?color=${encodeURIComponent(color)}`)
   }
 
   const searchResults = searchData?.pages[0]
   const tracks = (searchResults?.tracks?.items || []).filter((track): track is NonNullable<typeof track> => track !== null && track !== undefined)
   const albums = (searchResults?.albums?.items || []).filter((album): album is NonNullable<typeof album> => album !== null && album !== undefined)
   const artists = (searchResults?.artists?.items || []).filter((artist): artist is NonNullable<typeof artist> => artist !== null && artist !== undefined)
-  
-  const topResult = artists[0] || albums[0] || tracks[0] || null
-  const hasResults = tracks.length > 0 || albums.length > 0 || artists.length > 0
+  const playlists = (searchResults?.playlists?.items || []).filter((playlist): playlist is NonNullable<typeof playlist> => playlist !== null && playlist !== undefined)
+  const shows = (searchResults?.shows?.items || []).filter((show): show is NonNullable<typeof show> => show !== null && show !== undefined)
+  const episodes = (searchResults?.episodes?.items || []).filter((episode): episode is NonNullable<typeof episode> => episode !== null && episode !== undefined)
+  const audiobooks = (searchResults?.audiobooks?.items || []).filter((audiobook): audiobook is NonNullable<typeof audiobook> => audiobook !== null && audiobook !== undefined)
+
+  const topResult = tracks[0] || artists[0] || albums[0] || null
+  const hasResults = tracks.length > 0 || albums.length > 0 || artists.length > 0 || playlists.length > 0 || shows.length > 0 || episodes.length > 0 || audiobooks.length > 0
 
   if (isLoadingCategories && !hasSearchKeyword) {
     return (
@@ -118,7 +125,7 @@ const SearchPage = () => {
   }
 
   if (categoriesError && !hasSearchKeyword) {
-    return <ErrorMessage errorMessage={categoriesError.message} />
+    return <ErrorMessage error={categoriesError} />
   }
 
   const categories = categoriesData?.categories.items || []
@@ -153,20 +160,20 @@ const SearchPage = () => {
           />
         </form>
       </div>
-
-      {hasSearchKeyword ? (
-        <div className={styles.categoriesSection}>
-          {!clientCredentialToken ? (
-            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px' }}>
-              <LoadingSpinner />
-            </Box>
-          ) : isLoadingSearch ? (
-            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px' }}>
-              <LoadingSpinner />
-            </Box>
-          ) : searchError ? (
-            <ErrorMessage errorMessage={searchError instanceof Error ? searchError.message : 'Failed to load search results'} />
-          ) : !hasResults ? (
+          {hasSearchKeyword ? (
+        searchError ? (
+          <ErrorMessage error={searchError} />
+        ) : (
+          <div className={styles.categoriesSection}>
+            {!clientCredentialToken ? (
+              <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px' }}>
+                <LoadingSpinner />
+              </Box>
+            ) : isLoadingSearch ? (
+              <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px' }}>
+                <LoadingSpinner />
+              </Box>
+            ) : !hasResults ? (
             <Box sx={{ p: 3, textAlign: 'center' }}>
               <Typography variant="h2">No results found</Typography>
             </Box>
@@ -176,142 +183,111 @@ const SearchPage = () => {
                 <Grid size={{ xs: 12, md: 4 }}>
                   {topResult && (
                     <Box>
-                      <Typography variant="h2" sx={{ mb: 2, fontWeight: 700, fontSize: '25px' }}>Top result</Typography>
+                      <Typography variant="h2" className={styles.sectionTitle}>Top result</Typography>
                       <div
                         className={styles.topResultCard}
                         onMouseEnter={() => setHoveredTopResult(true)}
                         onMouseLeave={() => setHoveredTopResult(false)}
-                        style={{
-                          backgroundColor: '#121212',
-                          borderRadius: '8px',
-                          padding: '16px',
-                          cursor: 'pointer',
-                          transition: 'background-color 0.2s',
-                          position: 'relative',
-                          height: '288px',
-                          display: 'flex',
-                          flexDirection: 'column',
-                        }}
                       >
-                        {topResult.type === 'artist' ? (
-                          <>
-                            <div
-                              style={{
-                                width: '100%',
-                                maxWidth: '200px',
-                                aspectRatio: '1',
-                                borderRadius: '8px',
-                                overflow: 'hidden',
-                                marginBottom: '8px',
-                                position: 'relative',
-                                flexShrink: 0,
-                                alignSelf: 'center',
-                              }}
-                            >
-                              <img
-                                src={(topResult as any).images?.[0]?.url || ''}
-                                alt={topResult.name}
-                                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                              />
-                              <PlayButton 
-                                sx={{
-                                  position: 'absolute',
-                                  bottom: '16px',
-                                  right: '6px !important',
-                                  opacity: hoveredTopResult ? 1 : 0,
-                                  transform: hoveredTopResult ? 'translateY(80px)' : 'translateY(50px)',
-                                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                                  boxShadow: hoveredTopResult ? '0 4px 12px rgba(0, 0, 0, 0.7)' : 'none',
-                                }}
-                              />
-                            </div>
-                            <Typography variant="h3" sx={{ fontWeight: 700, marginBottom: '5px', fontSize: '1.5rem', flexShrink: 0, textAlign: 'center' }}>
-                              {topResult.name}
-                            </Typography>
-                            <Typography variant="body2" sx={{ color: 'text.secondary', flexShrink: 0, textAlign: 'center' }}>
-                              Artist
-                            </Typography>
-                          </>
-                        ) : topResult.type === 'track' ? (
-                          <>
-                            <div 
-                              style={{ 
-                                position: 'relative', 
-                                marginBottom: '16px', 
-                                flexShrink: 0, 
-                                width: '100%', 
-                                maxWidth: '200px', 
-                                aspectRatio: '1', 
-                                alignSelf: 'center' 
-                              }}
-                            >
-                              <img
-                                src={(topResult as any).album?.images?.[0]?.url || ''}
-                                alt={topResult.name}
-                                style={{
-                                  width: '100%',
-                                  height: '100%',
-                                  borderRadius: '8px',
-                                  objectFit: 'cover',
-                                }}
-                              />
-                              <PlayButton sx={{
-                                  position: 'absolute',
-                                  bottom: '16px',
-                                  right: '8px',
-                                  opacity: hoveredTopResult ? 1 : 0,
-                                  transform: hoveredTopResult ? 'translateY(-5px)' : 'translateY(10px)',
-                                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                                  boxShadow: hoveredTopResult ? '0 4px 12px rgba(0, 0, 0, 0.7)' : 'none',
-                                }} />
-                            </div>
-                            <Typography variant="h3" sx={{ fontWeight: 700, marginBottom: '5px', fontSize: '1.5rem', flexShrink: 0, textAlign: 'center' }}>
-                              {topResult.name}
-                            </Typography>
-                            <Typography variant="body2" sx={{ color: 'text.secondary', flexShrink: 0, textAlign: 'center' }}>
-                              Song • {(topResult as any).artists?.map((a: any) => a.name).join(', ') || 'Unknown'}
-                            </Typography>
-                          </>
+                        {'album' in topResult ? (
+                          (() => {
+                            const track = topResult as Track
+                            return (
+                              <>
+                                <div className={`${styles.topResultImageContainer} ${styles.album}`}>
+                                  <img
+                                    src={track.album?.images?.[0]?.url || ''}
+                                    alt={track.name || ''}
+                                    className={styles.topResultImage}
+                                  />
+                                  <PlayButton 
+                                    sx={{
+                                      position: 'absolute !important',
+                                      bottom: '2px !important',
+                                      right: '7px !important',
+                                      opacity: hoveredTopResult ? 1 : 0,
+                                      transform: hoveredTopResult ? 'translateY(-5px)' : 'translateY(10px)',
+                                      transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                                      boxShadow: hoveredTopResult ? '0 4px 12px rgba(0, 0, 0, 0.7)' : 'none',
+                                      zIndex: 2,
+                                    }}
+                                  />
+                                </div>
+                                <Typography variant="h3" className={styles.topResultTitle}>
+                                  {track.name}
+                                </Typography>
+                                <Typography variant="body2" className={styles.topResultSubtitle} sx={{ color: 'text.secondary' }}>
+                                  Song • {track.artists?.map((a) => a.name).join(', ') || 'Unknown'}
+                                </Typography>
+                              </>
+                            )
+                          })()
+                        ) : 'artists' in topResult && Array.isArray(topResult.artists) ? (
+                          (() => {
+                            const album = topResult as unknown as SimplifiedAlbum
+                            return (
+                              <>
+                                <div className={`${styles.topResultImageContainer} ${styles.album}`}>
+                                  <img
+                                    src={album.images?.[0]?.url || ''}
+                                    alt={album.name || ''}
+                                    className={styles.topResultImage}
+                                  />
+                                  <PlayButton 
+                                    sx={{
+                                      position: 'absolute !important',
+                                      bottom: '2px !important',
+                                      right: '7px !important',
+                                      opacity: hoveredTopResult ? 1 : 0,
+                                      transform: hoveredTopResult ? 'translateY(-5px)' : 'translateY(10px)',
+                                      transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                                      boxShadow: hoveredTopResult ? '0 4px 12px rgba(0, 0, 0, 0.7)' : 'none',
+                                      zIndex: 2,
+                                    }}
+                                  />
+                                </div>
+                                <Typography variant="h3" className={styles.topResultTitle}>
+                                  {album.name}
+                                </Typography>
+                                <Typography variant="body2" className={styles.topResultSubtitle} sx={{ color: 'text.secondary' }}>
+                                  {album.artists?.map((a) => a.name).join(', ') || 'Unknown'}
+                                </Typography>
+                              </>
+                            )
+                          })()
                         ) : (
-                          <>
-                            <div 
-                              style={{ 
-                                position: 'relative', 
-                                marginBottom: '16px', 
-                                flexShrink: 0, 
-                                width: '100%', 
-                                maxWidth: '200px', 
-                                aspectRatio: '1', 
-                                alignSelf: 'center' 
-                              }}
-                            >
-                              <img
-                                src={(topResult as any).images?.[0]?.url || ''}
-                                alt={topResult.name}
-                                style={{
-                                  width: '100%',
-                                  height: '100%',
-                                  borderRadius: '8px',
-                                  objectFit: 'cover',
-                                }}
-                              />
-                              <PlayButton sx={{
-                                  position: 'absolute',
-                                  bottom: '16px',
-                                  right: '8px',
-                                  opacity: hoveredTopResult ? 1 : 0,
-                                  transform: hoveredTopResult ? 'translateY(-5px)' : 'translateY(10px)',
-                                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                                  boxShadow: hoveredTopResult ? '0 4px 12px rgba(0, 0, 0, 0.7)' : 'none',
-                                }} />
-                            </div>
-                            <Typography variant="h3" sx={{ fontWeight: 700, marginBottom: '5px', fontSize: '1.5rem', flexShrink: 0, textAlign: 'center' }}>
-                              {topResult.name}
-                            </Typography>
-                            <Typography variant="body2" sx={{ color: 'text.secondary', flexShrink: 0, textAlign: 'center' }}>
-                              {(topResult as any).artists?.map((a: any) => a.name).join(', ') || 'Unknown'}
-                            </Typography>
-                          </>
+                          (() => {
+                            const artist = topResult as unknown as Artist
+                            return (
+                              <>
+                                <div className={styles.topResultImageContainer}>
+                                  <img
+                                    src={artist.images?.[0]?.url || ''}
+                                    alt={artist.name || ''}
+                                    className={`${styles.topResultImage} ${styles.artist}`}
+                                  />
+                                  <PlayButton 
+                                    sx={{
+                                      position: 'absolute !important',
+                                      bottom: '2px !important',
+                                      right: '7px !important',
+                                      opacity: hoveredTopResult ? 1 : 0,
+                                      transform: hoveredTopResult ? 'translateY(-5px)' : 'translateY(10px)',
+                                      transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                                      boxShadow: hoveredTopResult ? '0 4px 12px rgba(0, 0, 0, 0.7)' : 'none',
+                                      zIndex: 2,
+                                    }}
+                                  />
+                                </div>
+                                <Typography variant="h3" className={styles.topResultTitle}>
+                                  {artist.name}
+                                </Typography>
+                                <Typography variant="body2" className={styles.topResultSubtitle} sx={{ color: 'text.secondary' }}>
+                                  Artist
+                                </Typography>
+                              </>
+                            )
+                          })()
                         )}
                       </div>
                     </Box>
@@ -319,133 +295,77 @@ const SearchPage = () => {
                 </Grid>
                 <Grid size={{ xs: 12, md: 7.2 }}>
                   {tracks.length > 0 && (
-                    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-                      <Typography variant="h2" sx={{ mb: 2, fontWeight: 700, fontSize: '25px' }}>Songs</Typography>
-                      <Box sx={{ flex: 1 }}>
-                        {tracks.slice(0, 4).map((track) => (
-                          <Box
-                            key={track.id}
-                            onMouseEnter={() => setHoveredTrackId(track.id || null)}
-                            onMouseLeave={() => setHoveredTrackId(null)}
-                            sx={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: 2,
-                              padding: '8px',
-                              borderRadius: '4px',
-                              cursor: 'pointer',
-                              transition: 'background-color 0.2s',
-                              '&:hover': {
-                                backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                              },
-                            }}
-                          >
-                            <Box 
-                              sx={{ 
-                                position: 'relative', 
-                                width: '56px', 
-                                height: '56px', 
-                                flexShrink: 0,
-                                overflow: 'hidden',
-                                borderRadius: '4px',
+                    <Box className={styles.trackListContainer}>
+                    <Typography variant="h2" className={styles.sectionTitle}>Songs</Typography>
+                    <Box sx={{ flex: 1 }}>
+                      {tracks.slice(0, 4).map((track) => (
+                        <Box
+                          key={track.id}
+                          className={styles.trackItem}
+                          onMouseEnter={() => setHoveredTrackId(track.id || null)}
+                          onMouseLeave={() => setHoveredTrackId(null)}
+                        >
+                          <Box className={styles.trackImageContainer}>
+                            <img
+                              src={track.album?.images?.[2]?.url || track.album?.images?.[0]?.url || ''}
+                              alt={track.name}
+                              className={styles.trackImage}
+                              style={{
+                                opacity: hoveredTrackId === track.id ? 0.5 : 1,
                               }}
-                            >
-                              <img
-                                src={track.album?.images?.[2]?.url || track.album?.images?.[0]?.url || ''}
-                                alt={track.name}
-                                style={{
-                                  width: '56px',
-                                  height: '56px',
-                                  borderRadius: '4px',
-                                  objectFit: 'cover',
-                                  transition: 'opacity 0.2s ease',
-                                  opacity: hoveredTrackId === track.id ? 0.5 : 1,
-                                }}
-                              />
-                              {hoveredTrackId === track.id && (
-                                <>
-                                  <Box
-                                    sx={{
-                                      position: 'absolute',
-                                      top: 0,
-                                      left: 0,
-                                      right: 0,
-                                      bottom: 0,
-                                      backgroundColor: 'rgba(0, 0, 0, 0.3)',
-                                      zIndex: 1,
-                                    }}
-                                  />
-                                  <Box
-                                    sx={{
-                                      position: 'absolute',
-                                      top: '50%',
-                                      left: '50%',
-                                      transform: 'translate(-50%, -50%)',
-                                      zIndex: 2,
-                                    }}
-                                  >
-                                    <IconButton
-                                      sx={{
-                                        color: 'white',
-                                        backgroundColor: 'transparent',
-                                        padding: '4px',
-                                        '&:hover': {
-                                          backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                                        },
-                                      }}
-                                    >
-                                      <PlayArrow sx={{ fontSize: 30 }} />
-                                    </IconButton>
-                                  </Box>
-                                </>
-                              )}
-                            </Box>
-                            <Box sx={{ flex: 1, minWidth: 0 }}>
-                              <Typography variant="body1" sx={{ fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                                {track.name || 'Unknown'}
-                              </Typography>
-                              <Typography variant="body2" sx={{ color: 'text.secondary', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                                {track.artists?.map(a => a.name).join(', ') || 'Unknown'}
-                              </Typography>
-                            </Box>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                              {hoveredTrackId === track.id && (
-                                <Tooltip title="Add to Liked Songs" placement="top" slotProps={{
-                                  tooltip: {
-                                    sx: {
-                                      fontSize: '14px',
-                                    }
+                            />
+                            {hoveredTrackId === track.id && (
+                              <>
+                                <Box className={styles.trackOverlay} />
+                                <Box className={styles.trackPlayButtonContainer}>
+                                  <IconButton className={styles.trackPlayIconButton}>
+                                    <PlayArrow sx={{ fontSize: 30 }} />
+                                  </IconButton>
+                                </Box>
+                              </>
+                            )}
+                          </Box>
+                          <Box className={styles.trackContent}>
+                            <Typography variant="body1" className={styles.trackTitle}>
+                              {track.name || 'Unknown'}
+                            </Typography>
+                            <Typography variant="body2" className={styles.trackArtist} sx={{ color: 'text.secondary' }}>
+                              {track.artists?.map(a => a.name).join(', ') || 'Unknown'}
+                            </Typography>
+                          </Box>
+                          <Box className={styles.trackActions}>
+                            {hoveredTrackId === track.id && (
+                              <Tooltip title="Add to Liked Songs" placement="top" slotProps={{
+                                tooltip: {
+                                  sx: {
+                                    fontSize: '14px',
                                   }
-                                }}>
-                                <IconButton
-                                  sx={{
-                                    color: 'white',
-                                    padding: '4px',
-                                  }}
-                                >
+                                }
+                              }}>
+                                <IconButton className={styles.trackAddButton}>
                                   <AddCircleOutlineIcon />
                                 </IconButton>
-                                </Tooltip>
-                              )}
-                              <Typography variant="body2" sx={{ color: 'text.secondary', minWidth: '40px', textAlign: 'right' }}>
-                                {formatDuration(track.duration_ms)}
-                              </Typography>
-                            </Box>
+                              </Tooltip>
+                            )}
+                            <Typography variant="body2" className={styles.trackDuration} sx={{ color: 'text.secondary' }}>
+                              {formatDuration(track.duration_ms)}
+                            </Typography>
                           </Box>
-                        ))}
-                      </Box>
+                        </Box>
+                      ))}
                     </Box>
+                  </Box>
                   )}
                 </Grid>
               </Grid>
 
               {artists.length > 0 && (
                 <Box sx={{ mb: 4 }}>
-                  <Typography variant="h2" sx={{ mb: 2, fontWeight: 700, fontSize: '25px' }}>Artists</Typography>
+                  <Typography variant="h2" className={styles.sectionTitle}>Artists</Typography>
                   <Grid container spacing={2}>
                     {artists.slice(0, 6).map((artist) => (
                       <Grid size={{ xs: 6, sm: 4, md: 3, lg: 2 }} key={artist.id}>
-                        <ResultCard image={(artist as any).images?.[0]?.url || ''} name={artist.name || 'Unknown'} />
+                        <ResultCard image={(artist as any).images?.[0]?.url || ''} name={artist.name || 'Unknown'} artistName="Artist" isArtist={true}/>
                       </Grid>
                     ))}
                   </Grid>
@@ -454,14 +374,93 @@ const SearchPage = () => {
 
               {albums.length > 0 && (
                 <Box sx={{ mb: 4 }}>
-                  <Typography variant="h2" sx={{ mb: 2, fontWeight: 700 , fontSize: '25px'}}>Albums</Typography>
+                  <Typography variant="h2" className={styles.sectionTitle}>Albums</Typography>
                   <Grid container spacing={2}>
-                    {albums.slice(0, 6).map((album) => (
-                      <Grid size={{ xs: 6, sm: 4, md: 3, lg: 2 }} key={album.id}>
+                    {albums.slice(0, 6).map((album) => {
+                      const releaseYear = album.release_date 
+                        ? new Date(album.release_date).getFullYear() 
+                        : null;
+                      const artistNames = album.artists?.map(a => a.name).join(', ') || 'Unknown';
+                      const displayText = releaseYear 
+                        ? `${releaseYear} • ${artistNames}`
+                        : artistNames;
+                      
+                      return (
+                        <Grid size={{ xs: 6, sm: 4, md: 3, lg: 2 }} key={album.id}>
+                          <ResultCard
+                            image={album.images?.[0]?.url || ''}
+                            name={album.name || 'Unknown'}
+                            artistName={displayText}
+                          />
+                        </Grid>
+                      );
+                    })}
+                  </Grid>
+                </Box>
+              )}
+              {playlists.length > 0 && (
+                <Box sx={{ mb: 4 }}>
+                  <Typography variant="h2" className={styles.sectionTitle}>Playlists</Typography>
+                  <Grid container spacing={2}>
+                    {playlists.slice(0, 6).map((playlist) => (
+                      <Grid size={{ xs: 6, sm: 4, md: 3, lg: 2 }} key={playlist.id}>
                         <ResultCard
-                          image={album.images?.[0]?.url || ''}
-                          name={album.name || 'Unknown'}
-                          artistName={album.artists?.map(a => a.name).join(', ') || 'Unknown'}
+                          image={playlist.images?.[0]?.url || ''}
+                          name={playlist.name || 'Unknown'}
+                          artistName={playlist.owner?.display_name || 'Unknown'}
+                        />
+                      </Grid>
+                    ))}
+                  </Grid>
+                </Box>
+              )}
+              {shows.length > 0 && (
+                <Box sx={{ mb: 4 }}>
+                  <Typography variant="h2" className={styles.sectionTitle}>Podcasts</Typography>
+                  <Grid container spacing={2}>
+                    {shows.slice(0, 6).map((show) => (
+                      <Grid size={{ xs: 6, sm: 4, md: 3, lg: 2 }} key={show.id}>
+                        <ResultCard
+                          image={(show.images as any)?.url || (Array.isArray(show.images) ? show.images?.[0]?.url : '') || ''}
+                          name={show.name || 'Unknown'}
+                          artistName={show.publisher || 'Unknown'}
+                        />
+                      </Grid>
+                    ))}
+                  </Grid>
+                </Box>
+              )}
+              {episodes.length > 0 && (
+                <Box sx={{ mb: 4 }}>
+                  <Typography variant="h2" className={styles.sectionTitle}>Episodes</Typography>
+                  <Grid container spacing={2}>
+                    {episodes.slice(0, 6).map((episode) => {
+                      const episodeImages = Array.isArray(episode.images) ? episode.images : (episode.images ? [episode.images] : [])
+                      const showName = 'show' in episode ? (episode as any).show?.name : 'Unknown'
+                      return (
+                        <Grid size={{ xs: 6, sm: 4, md: 3, lg: 2 }} key={episode.id}>
+                          <ResultCard
+                            image={episodeImages[0]?.url || ''}
+                            name={episode.name || 'Unknown'}
+                            artistName={showName || 'Unknown'}
+                          />
+                        </Grid>
+                      )
+                    })}
+                  </Grid>
+                </Box>
+              )}
+
+              {audiobooks.length > 0 && (
+                <Box sx={{ mb: 4 }}>
+                  <Typography variant="h2" className={styles.sectionTitle}>Audiobooks</Typography>
+                  <Grid container spacing={2}>
+                    {audiobooks.slice(0, 6).map((audiobook) => (
+                      <Grid size={{ xs: 6, sm: 4, md: 3, lg: 2 }} key={audiobook.id}>
+                        <ResultCard
+                          image={audiobook.images?.[0]?.url || ''}
+                          name={audiobook.name || 'Unknown'}
+                          artistName={audiobook.author?.map((a: {name: string}) => a.name).join(', ') || audiobook.publisher || 'Unknown'}
                         />
                       </Grid>
                     ))}
@@ -471,6 +470,7 @@ const SearchPage = () => {
             </>
           )}
         </div>
+        )
       ) : (
         <div className={styles.categoriesSection}>
           <Typography variant='h2' className={styles.categoriesTitle}>Browse all</Typography>
@@ -496,7 +496,7 @@ const SearchPage = () => {
                       transition: 'filter 0.3s ease, transform 0.2s ease',
                       filter: shouldDim ? 'brightness(0.5)' : 'brightness(1)',
                     }}
-                    onClick={() => handleCategoryClick(category.id)}
+                    onClick={() => handleCategoryClick(category.id, category.name)}
                     onMouseEnter={() => handleCardMouseEnter(category.id)}
                   >
                     <CardContent className={styles.categoryCardContent}>

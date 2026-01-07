@@ -18,7 +18,10 @@ export const searchItemsByKeyword = async(token:string, params:SearchRequestPara
       }
     })
     return response.data
-  } catch (error) {
-      throw new Error("Failed to search by keyword")
-  }
- }
+    } catch (error: any) {
+        if (axios.isAxiosError(error)) {
+          throw error
+        }
+        throw new Error("Failed to search by keyword")
+      }
+    }

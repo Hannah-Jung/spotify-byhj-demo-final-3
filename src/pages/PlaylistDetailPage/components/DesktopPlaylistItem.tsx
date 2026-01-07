@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react'
 import type { PlaylistTrack } from '../../../models/playlist'
-import { TableCell, TableRow, Box } from '@mui/material'
+import { TableCell, TableRow, Box, IconButton } from '@mui/material'
 import type { Episode, Track } from '../../../models/track'
 import styles from "../PlaylistDetailPage.module.css"
+import { PlayArrow } from '@mui/icons-material'
 
 interface DesktopPlaylistItemProps {
   index: number,
@@ -10,6 +11,7 @@ interface DesktopPlaylistItemProps {
 }
 
 const DesktopPlaylistItem = ({ item, index }: DesktopPlaylistItemProps) => {
+  const [isHovered, setIsHovered] = useState(false)
   const isEpisode = (track: Track | Episode): track is Episode => {
     return "description" in track;
   };
@@ -67,32 +69,54 @@ const DesktopPlaylistItem = ({ item, index }: DesktopPlaylistItemProps) => {
   }, []);
 
   return (
-    <TableRow hover sx={{'& > *': { borderBottom: 'none !important' }}}>
-      <TableCell className={styles.colIndex} sx={{ width: 50, padding: '12px 16px' }}>
-        {index}
+    <TableRow onMouseEnter={() => setIsHovered(true)} onMouseLeave={() => setIsHovered(false)} hover sx={{'& > *': { borderBottom: 'none !important' }}}>
+      <TableCell className={styles.colIndex} sx={{ width: 50, padding: '2px 16px' }}>
+        <Box className={styles.indexCell}>
+          <span 
+            className={styles.indexNumber}
+            style={{ opacity: isHovered ? 0 : 1 }}
+          >
+            {index}
+          </span>
+          <IconButton
+            className={styles.playButton}
+            sx={{
+              opacity: isHovered ? 1 : 0,
+              transform: isHovered ? 'scale(1)' : 'scale(0.8)',
+              transition: 'opacity 0.2s ease, transform 0.2s ease',
+              color: 'white',
+              padding: '4px',
+              '&:hover': {
+                backgroundColor: 'transparent',
+              }
+            }}
+          >
+            <PlayArrow sx={{ fontSize: 20 }} />
+          </IconButton>
+        </Box>
       </TableCell>
-      <TableCell className={styles.colTitleThumb} sx={{ width: 60 }}>
-  <Box sx={{ 
-    display: 'flex', 
-    justifyContent: 'center', 
-    alignItems: 'center',
-    width: '100%',
-    height: 64 
-  }}>
-    <img
-      src={(track as Track).album?.images?.[2]?.url || '/placeholder.png'}
-      alt={albumName}
-      style={{
-        width: 40,
-        height: 40,
-        borderRadius: 4,
-        objectFit: 'cover'
-      }}
-    />
-  </Box>
-</TableCell>
+      <TableCell className={styles.colTitleThumb} sx={{ width: 60, padding: '2px 16px' }}>
+      <Box sx={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center',
+        width: '100%',
+        height: 64 
+      }}>
+        <img
+          src={(track as Track).album?.images?.[2]?.url || '/placeholder.png'}
+          alt={albumName}
+          style={{
+            width: 40,
+            height: 40,
+            borderRadius: 4,
+            objectFit: 'cover'
+          }}
+        />
+      </Box>
+    </TableCell>
       
-      <TableCell className={styles.colTitle} sx={{ width: 350, padding: '12px 16px' }}>
+      <TableCell className={styles.colTitle} sx={{ width: 350, padding: '2px 16px' }}>
         <Box sx={{ display: 'flex', flexDirection: 'column' }}>
           <span style={{ fontWeight: 500, fontSize: '1rem' }}>
             {trackName}
@@ -107,17 +131,17 @@ const DesktopPlaylistItem = ({ item, index }: DesktopPlaylistItemProps) => {
         </Box>
       </TableCell>
       
-      <TableCell className={styles.colAlbum} sx={{ width: 250, padding: '12px 16px' }}>
+      <TableCell className={styles.colAlbum} sx={{ width: 250, padding: '2px 16px' }}>
         <span style={{ fontSize: '0.875rem' }}>
           {albumName}
         </span>
       </TableCell>
       
-      <TableCell className={styles.colDate} sx={{ width: 150, padding: '12px 16px' }}>
+      <TableCell className={styles.colDate} sx={{ width: 150, padding: '2px 16px' }}>
         {item.added_at ? formatRelativeTime(item.added_at) : 'Unknown'}
       </TableCell>
       
-      <TableCell className={styles.colDuration} sx={{ width: 80, padding: '12px 16px', textAlign: 'right' }}>
+      <TableCell className={styles.colDuration} sx={{ width: 80, padding: '2px 16px', textAlign: 'right' }}>
         {track.duration_ms ? formatDuration(track.duration_ms) : '0:00'}
       </TableCell>
     </TableRow>

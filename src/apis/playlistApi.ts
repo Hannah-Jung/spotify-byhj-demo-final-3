@@ -1,3 +1,4 @@
+import axios from "axios"
 import type { CreatePlaylistRequest, GetCurrentUserPlaylistRequest, GetCurrentUserPlaylistResponse, GetPlaylistItemsRequest, GetPlaylistItemsResponse, GetPlaylistRequest, Playlist } from "../models/playlist"
 import api from "../utils/api"
 
@@ -7,10 +8,13 @@ export const getCurrentUserPlaylists = async({limit, offset}:GetCurrentUserPlayl
       params: {limit, offset}
     })
     return response.data
-  } catch (error) {
-    throw new Error("Failed to fetch current user playlists")
+    } catch (error: any) {
+      if (axios.isAxiosError(error)) {
+        throw error
+      }
+      throw new Error("Failed to fetch current user playlists")
+    }
   }
-}
 
 export const getPlaylist = async (params:GetPlaylistRequest): Promise<Playlist> => { 
   try {
@@ -18,10 +22,13 @@ export const getPlaylist = async (params:GetPlaylistRequest): Promise<Playlist> 
         params,
       })
       return response.data
-  } catch (error) {
-    throw new Error("Failed to fetch playlist detail")
-  }
-} 
+      } catch (error: any) {
+        if (axios.isAxiosError(error)) {
+          throw error
+        }
+        throw new Error("Failed to fetch playlist detail")
+      }
+    }
 
 export const getPlaylistItems = async(params: GetPlaylistItemsRequest):Promise<GetPlaylistItemsResponse> => { 
   try {
@@ -41,8 +48,7 @@ export const createPlaylist = async(user_id:string, params:CreatePlaylistRequest
     throw new Error("Failed to create playlist")
   }
  }
- 
-//added
+
 export interface AddTracksToPlaylistRequest {
   playlist_id: string,
   uris: string[], 

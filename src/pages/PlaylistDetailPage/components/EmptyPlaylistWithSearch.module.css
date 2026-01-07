@@ -5,6 +5,7 @@
   width: 100%;
   overflow: visible;
   position: relative;
+  padding: 0 32px
 }
 
 .stickyContainer {
@@ -32,6 +33,19 @@
 .searchInput {
   width: 100%;
   margin-bottom: 0;
+}
+
+.searchInput :global(.MuiOutlinedInput-root) {
+  border-radius: 500px !important;
+  transition: border-color 0.3s ease;
+}
+
+.searchInput :global(.MuiOutlinedInput-root:hover) {
+  border-color: #00d86b !important;
+}
+
+.searchInput :global(.MuiOutlinedInput-notchedOutline) {
+  transition: border-color 0.3s ease;
 }
 
 .searchInput :global(.MuiInputAdornment-root svg) {

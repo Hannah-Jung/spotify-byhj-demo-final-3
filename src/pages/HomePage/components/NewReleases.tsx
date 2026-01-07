@@ -11,7 +11,7 @@ const NewReleases = () => {
     return <LoadingSpinner/>
   }
   if(error){
-    return <ErrorMessage errorMessage={error.message}/>
+    return <ErrorMessage error={error} />
   }
   return (
     <div>

@@ -1,4 +1,3 @@
-import ErrorMessage from '../../common/components/ErrorMessage'
 import LoadingSpinner from '../../common/components/LoadingSpinner'
 import useGetCurrentUserPlaylists from '../../hooks/useGetCurrentUserPlaylists'
 import EmptyPlaylist from './EmptyPlaylist'
@@ -67,7 +66,7 @@ const Library = () => {
   
   if (!user) return <EmptyPlaylist/>
   if (isLoading) return <LoadingSpinner/>
-  if (error) return <ErrorMessage errorMessage={error.message}/>
+  if (error) return <EmptyPlaylist/>
   console.log("current user playlists: ", data)
 
   const playlists = data?.pages.flatMap(page => page.items) || []
